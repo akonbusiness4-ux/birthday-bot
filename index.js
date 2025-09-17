@@ -1,9 +1,11 @@
 const fetch = require("node-fetch");
-const db = require("./firebase-config"); // Firebase ulash
+const db = require("./firebase-config");
+const express = require("express");
+const app = express();
 
 // 🔑 Telegram token va chat_id
 const TELEGRAM_TOKEN = "8337711727:AAEMGO_tAWp78iYTc1in-6uQqf4YDawxdbQ";
-const CHAT_ID = "6533899767"; // sizni user id
+const CHAT_ID = "6533899767";
 
 // 📩 Xabar yuborish funksiyasi
 async function sendMessage(text) {
@@ -15,7 +17,7 @@ async function sendMessage(text) {
   });
 }
 
-// 🎂 Tug‘ilgan kun tekshirish
+// 🎂 Tug‘ilgan kun tekshirish va eslatma qo‘yish
 function checkBirthdays() {
   const today = new Date();
   const twoDaysLater = new Date();
@@ -30,15 +32,37 @@ function checkBirthdays() {
       if (!user.birthday) return;
       const bd = user.birthday.slice(5, 10);
 
+      // 🎯 2 kun oldin → 2 marta (har 3 soatda)
+      if (bd === twoDaysStr) {
+        for (let i = 0; i < 2; i++) {
+          setTimeout(() => {
+            sendMessage(`⏰ 2 kundan keyin <b>${user.firstname} ${user.lastname}</b> ning tug‘ilgan kuni bo‘ladi!`);
+          }, i * 3 * 60 * 60 * 1000);
+        }
+      }
+
+      // 🎯 Tug‘ilgan kuni → 5 marta (har 2 soatda)
       if (bd === todayStr) {
-        sendMessage(`🎉 Bugun <b>${user.firstname} ${user.lastname}</b> ning tug‘ilgan kuni!`);
-      } else if (bd === twoDaysStr) {
-        sendMessage(`⏰ 2 kundan keyin <b>${user.firstname} ${user.lastname}</b> ning tug‘ilgan kuni bo‘ladi!`);
+        for (let i = 0; i < 5; i++) {
+          setTimeout(() => {
+            sendMessage(`🎉 Bugun <b>${user.firstname} ${user.lastname}</b> ning tug‘ilgan kuni!`);
+          }, i * 2 * 60 * 60 * 1000);
+        }
       }
     });
   });
 }
 
-// ⏱ Har 30 sekundda tekshiradi
-setInterval(checkBirthdays, 30000);
+// ⏱ Har kuni 1 marta tekshiradi (86400000 ms = 1 kun)
+setInterval(checkBirthdays, 24 * 60 * 60 * 1000);
+checkBirthdays(); // dastur ishga tushganda ham tekshiradi
+
 console.log("🤖 Birthday bot ishlayapti...");
+
+// 🌐 Express server (Render uxlamasligi uchun)
+app.get("/", (req, res) => {
+  res.send("Bot tirik ✅");
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🌐 Web server ${PORT}-portda ishlayapti...`));
