@@ -10,11 +10,19 @@ const CHAT_ID = "6533899767";
 // 📩 Xabar yuborish funksiyasi
 async function sendMessage(text) {
   const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-  await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: CHAT_ID, text: text, parse_mode: "HTML" })
-  });
+  try {
+    await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        text: text,
+        parse_mode: "HTML"
+      })
+    });
+  } catch (err) {
+    console.error("❌ Xabar yuborishda xato:", err.message);
+  }
 }
 
 // 🎂 Tug‘ilgan kun tekshirish va eslatma qo‘yish
@@ -36,7 +44,9 @@ function checkBirthdays() {
       if (bd === twoDaysStr) {
         for (let i = 0; i < 2; i++) {
           setTimeout(() => {
-            sendMessage(`⏰ 2 kundan keyin <b>${user.firstname} ${user.lastname}</b> ning tug‘ilgan kuni bo‘ladi!`);
+            sendMessage(
+              `⏰ 2 kundan keyin <b>${user.firstname} ${user.lastname}</b> ning tug‘ilgan kuni bo‘ladi!`
+            );
           }, i * 3 * 60 * 60 * 1000);
         }
       }
@@ -45,7 +55,9 @@ function checkBirthdays() {
       if (bd === todayStr) {
         for (let i = 0; i < 5; i++) {
           setTimeout(() => {
-            sendMessage(`🎉 Bugun <b>${user.firstname} ${user.lastname}</b> ning tug‘ilgan kuni!`);
+            sendMessage(
+              `🎉 Bugun <b>${user.firstname} ${user.lastname}</b> ning tug‘ilgan kuni!`
+            );
           }, i * 2 * 60 * 60 * 1000);
         }
       }
@@ -55,7 +67,9 @@ function checkBirthdays() {
 
 // ⏱ Har kuni 1 marta tekshiradi (86400000 ms = 1 kun)
 setInterval(checkBirthdays, 24 * 60 * 60 * 1000);
-checkBirthdays(); // dastur ishga tushganda ham tekshiradi
+
+// 🚀 Dastur ishga tushganda ham darhol tekshiradi
+checkBirthdays();
 
 console.log("🤖 Birthday bot ishlayapti...");
 
